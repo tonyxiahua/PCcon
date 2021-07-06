@@ -81,7 +81,7 @@ optional arguments:
 如果你之前已经连接过了自己的Switch的话，你需要做的事情是在启动脚本后面加上 `-r auto` 或者  `-r <Switch Bluetooth Mac address>`
 
 ## API 接口 （我个人不觉得是）
-代码我放这里了，你读得懂就改吧。
+代码我放这里了，读得懂就改吧。
 ```python
 from joycontrol.protocol import controller_protocol_factory
 from joycontrol.server import create_hid_server
@@ -106,6 +106,7 @@ await controller_state.send()
 ## 已知问题
 - 有一些蓝牙接收器并不是接受很好，尝试使用USB 接收器或者使用树莓派系统。[Issue #8](https://github.com/mart1nro/joycontrol/issues/8)
 - 一堆疑难杂症……
+- Plan，Code，Build，Test，Release，Deploy，Operate···
 
 ## 感谢
 - 特别感谢： https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering 的控制器逆向工程文件

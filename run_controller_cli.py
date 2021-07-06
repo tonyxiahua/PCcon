@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
+"""
+This code have three parts 
 
+1. Fucntions 
+2. Register to main CLI
+3. Main CLI
+
+"""
 import argparse
 import asyncio
 import logging
@@ -19,40 +26,9 @@ from joycontrol.nfc_tag import NFCTag
 
 logger = logging.getLogger(__name__)
 
-"""Emulates Switch controller. Opens joycontrol.command_line_interface to send button commands and more.
-
-While running the cli, call "help" for an explanation of available commands.
-
-Usage:
-    run_controller_cli.py <controller> [--device_id | -d  <bluetooth_adapter_id>]
-                                       [--spi_flash <spi_flash_memory_file>]
-                                       [--reconnect_bt_addr | -r <console_bluetooth_address>]
-                                       [--log | -l <communication_log_file>]
-                                       [--nfc <nfc_data_file>]
-    run_controller_cli.py -h | --help
-
-Arguments:
-    controller      Choose which controller to emulate. Either "JOYCON_R", "JOYCON_L" or "PRO_CONTROLLER"
-
-Options:
-    -d --device_id <bluetooth_adapter_id>   ID of the bluetooth adapter. Integer matching the digit in the hci* notation
-                                            (e.g. hci0, hci1, ...) or Bluetooth mac address of the adapter in string
-                                            notation (e.g. "FF:FF:FF:FF:FF:FF").
-                                            Note: Selection of adapters may not work if the bluez "input" plugin is
-                                            enabled.
-
-    --spi_flash <spi_flash_memory_file>     Memory dump of a real Switch controller. Required for joystick emulation.
-                                            Allows displaying of JoyCon colors.
-                                            Memory dumps can be created using the dump_spi_flash.py script.
-
-    -r --reconnect_bt_addr <console_bluetooth_address>  Previously connected Switch console Bluetooth address in string
-                                                        notation (e.g. "FF:FF:FF:FF:FF:FF") for reconnection.
-                                                        Does not require the "Change Grip/Order" menu to be opened,
-
-    -l --log <communication_log_file>       Write hid communication (input reports and output reports) to a file.
-
-    --nfc <nfc_data_file>                   Sets the nfc data of the controller to a given nfc dump upon initial
-                                            connection.
+"""
+Testing Button 
+1. you can start from here to learn how to build a proper command 
 """
 
 
@@ -137,6 +113,10 @@ async def test_controller_buttons(controller_state: ControllerState):
     # go back to home
     await button_push(controller_state, 'home')
 
+"""
+Ensure Valid Butoon 
+
+"""
 
 def ensure_valid_button(controller_state, *buttons):
     """
@@ -147,6 +127,12 @@ def ensure_valid_button(controller_state, *buttons):
     for button in buttons:
         if button not in controller_state.button_state.get_available_buttons():
             raise ValueError(f'Button {button} does not exist on {controller_state.get_controller()}')
+
+"""
+Mash Button
+Keep pressing button for a time 
+
+"""
 
 
 async def mash_button(controller_state, button, interval):
@@ -165,6 +151,72 @@ async def mash_button(controller_state, button, interval):
     # await future to trigger exceptions in case something went wrong
     await user_input
 
+"""
+This is one sample code for the Animal Crossing Buying Custom Kit Demo
+
+
+"""
+
+
+async def buyCustomKit(controller_state: ControllerState):
+    if controller_state.get_controller() != Controller.PRO_CONTROLLER:
+        raise ValueError('This script only works with the Pro Controller!')
+    await controller_state.connect()
+    await ainput(prompt='动森购买器 Make sure the Animal crossing in shop item and press <enter> to continue.')
+    user_input = asyncio.ensure_future(
+        ainput(prompt='Buying gifts... Press <enter> to stop.')
+    )
+    while not user_input.done():
+        await button_push(controller_state, 'a')
+        await button_push(controller_state, 'b')
+        await asyncio.sleep(0.4)
+        await button_push(controller_state, 'a')
+        await button_push(controller_state, 'b')
+        await asyncio.sleep(0.4)
+        await button_push(controller_state, 'down')
+        await button_push(controller_state, 'a')
+        await button_push(controller_state, 'b')
+        await asyncio.sleep(1.5)
+        await button_push(controller_state, 'a')
+        await button_push(controller_state, 'b')
+        await asyncio.sleep(0.4)
+        await button_push(controller_state, 'a')
+        await button_push(controller_state, 'b')
+        await asyncio.sleep(0.4)
+    await user_input
+
+"""
+Drop 9 items on the empty ground.
+-- TO DO
+1. auto clear full backpack at 3*3n ground 
+"""
+
+async def dropBackpackItems(controller_state: ControllerState):
+    if controller_state.get_controller() != Controller.PRO_CONTROLLER:
+        raise ValueError('This script only works with the Pro Controller!')
+    await controller_state.connect()
+    await ainput(prompt='集合啦动物森友会！ You choose clear 9 items function! press <enter> to continue.')
+    user_input = asyncio.ensure_future(
+        ainput(prompt='Dropping items... Press <enter> to stop.')
+    )
+    while not user_input.done():
+        await button_push(controller_state, 'a')
+        await asyncio.sleep(0.3)
+        await button_push(controller_state, 'down')
+        await button_push(controller_state, 'a')
+        await asyncio.sleep(0.8)
+        await button_push(controller_state, 'right')
+        await asyncio.sleep(0.3)
+    await user_input
+
+#-------------------------------------------------------------------------------------------------------------
+
+
+"""
+This is important!
+Remember register your edited command here!
+
+"""
 def _register_commands_with_controller_state(controller_state, cli):
     """
     Commands registered here can use the given controller state.
@@ -172,6 +224,17 @@ def _register_commands_with_controller_state(controller_state, cli):
     :param cli:
     :param controller_state:
     """
+
+    async def _run_ACNH_buyCustomKit(): 
+        await buyCustomKit(controller_state)
+    cli.add_command('buyCustomKit',_run_ACNH_buyCustomKit)
+    
+    
+    async def _run_ACNH_dropBackpackItems(): 
+        await dropBackpackItems(controller_state)
+    cli.add_command('dropBackpackItems',_run_buy)
+
+    
     async def test_buttons():
         """
         test_buttons - Navigates to the "Test Controller Buttons" menu and presses all buttons.
@@ -291,6 +354,9 @@ def _register_commands_with_controller_state(controller_state, cli):
 
     cli.add_command(unpause.__name__, unpause)
 
+
+
+
 async def _main(args):
     # Get controller name to emulate from arguments
     controller = Controller.from_arg(args.controller)
@@ -332,6 +398,10 @@ async def _main(args):
         finally:
             logger.info('Stopping communication...')
             await transport.close()
+
+"""
+Main function configure
+"""
 
 
 if __name__ == '__main__':
